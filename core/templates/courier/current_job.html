@@ -1,0 +1,191 @@
+{% extends 'courier/base.html' %}
+{% load static %}
+
+{% block head %}
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAP_API_KEY }}&callback=initMap&libraries=places&v=weekly"
+  defer></script>
+
+<script>
+  var pickupLat = parseFloat(" {{ job.pickup_lat }} ");
+  var pickupLng = parseFloat(" {{ job.pickup_lng }} ");
+  var deliveryLat = parseFloat(" {{ job.delivery_lat }} ");
+  var deliveryLng = parseFloat(" {{ job.delivery_lng }} ");
+
+  function initMap() {
+
+    if (!document.getElementById("map")) {
+      return;
+    }
+
+    const directionsService = new google.maps.DirectionsService();
+    const directionsRenderer = new google.maps.DirectionsRenderer();
+    const map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 7,
+      center: { lat: 41.85, lng: -87.65 },
+    });
+    directionsRenderer.setMap(map);
+
+    calculateAndDisplayRoute(map, directionsService, directionsRenderer);
+  }
+
+  function calculateAndDisplayRoute(map, directionsService, directionsRenderer) {
+    directionsService.route(
+      {
+        origin: new google.maps.LatLng(pickupLat, pickupLng),
+        destination: new google.maps.LatLng(deliveryLat, deliveryLng),
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (response, status) => {
+        if (status === "OK") {
+          new google.maps.DirectionsRenderer({
+            map: map,
+            directions: response,
+            suppressMarkers: true,
+            polylineOptions: {
+              strokeColor: "#000",
+              strokeWeight: 5,
+              strokeOpacity: 0.8
+            }
+          });
+
+          var leg = response.routes[0].legs[0];
+          new google.maps.Marker({
+            position: leg.start_location,
+            map: map,
+            icon: "{% static 'img/start.png' %}"
+          });
+
+          new google.maps.Marker({
+            position: leg.end_location,
+            map: map,
+            icon: "{% static 'img/end.png' %}"
+          });
+
+          updateCourierPosition(map);
+        } else {
+          window.alert("Directions request failed due to " + status);
+        }
+      }
+    );
+  }
+
+  function updateCourierPosition(map) {
+    const jobSocket = new WebSocket(
+      "ws{% if request.get_host != 'localhost:8000' %}s{% endif %}://" + window.location.host + "/ws/jobs/{{ job.id }}/"
+    );
+
+    navigator.geolocation.watchPosition(
+      pos => {
+        var courierPostion = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+
+        if (!window.courierMarker) {
+          window.courierMarker = new google.maps.Marker({
+            position: courierPostion,
+            map,
+            icon: "{% static 'img/courier.png' %}"
+          });
+        } else {
+          window.courierMarker.setPosition(courierPostion);
+        }
+
+        map.panTo(courierPostion);
+
+        try {
+          jobSocket.send(JSON.stringify({
+            job: {
+              courier_lat: pos.coords.latitude,
+              courier_lng: pos.coords.longitude,
+            }
+          }))
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      pos => console.log(pos))
+  }
+</script>
+
+<style>
+  #map {
+    flex: 1;
+  }
+
+  small {
+    font-size: 12px;
+    line-height: 1.2rem;
+  }
+
+  .card {
+    border: none;
+  }
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column h-100" style="padding-bottom: 60px">
+
+  <div class="text-center">
+    <div class="btn-group mt-1 mb-1 align-item-center" role="group">
+      <a href="{% url 'courier:current_job' %}" class="btn btn-warning">Current Job</a>
+      <a href="{% url 'courier:archived_jobs' %}" class="btn btn-outline-warning">Archived Jobs</a>
+    </div>
+  </div>
+
+  {% if job %}
+
+  <div id="map"></div>
+
+  <div class="card">
+    <div class="card-body p-2">
+      <div class="media">
+        <img src="{{ job.photo.url }}" class="rounded-lg mr-3" width="50px" height="50px">
+        <div class="media-body">
+          <b>{{ job.name }}</b>
+          <div class="d-flex">
+            <div class="flex-grow-1 mr-2">
+
+              <small class="text-success">
+                <i class="fas fa-car"></i> <span>{{ job.distance }}</span> km
+                <i class="far fa-clock ml-2"></i> <span>{{ job.duration }}</span> mins
+              </small>
+
+              <div class="d-flex align-items-center mt-2">
+                <i class="fas fa-map-marker-alt"></i>
+                <small class="text-secondary ml-2">{{ job.pickup_address }}</small>
+              </div>
+
+              <div class="d-flex align-items-center mt-2">
+                <i class="fas fa-flag-checkered"></i>
+                <small class="text-secondary ml-2">{{ job.delivery_address }}</small>
+              </div>
+
+            </div>
+            Ksh.<h3>{{ job.price }}</h3>
+
+          </div>
+        </div>
+      </div>
+
+      <a href="{% url 'courier:current_job_take_photo' job.id %}" class="btn btn-block btn-warning btn-md mt-3">
+        {% if job.status == 'picking' %}Pickup{% else %}Drop-off{% endif %}
+      </a>
+    </div>
+  </div>
+
+  {% else %}
+
+  <div id="main" class="text-center">
+    <p>You have no job now. Let's pick a new one.</p>
+  </div>
+
+  {% endif %}
+
+</div>
+
+{% include 'courier/bottom_tabs.html' %}
+
+{% endblock %}

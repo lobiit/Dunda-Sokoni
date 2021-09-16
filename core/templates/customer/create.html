@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+
+{% block head %}
+
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPR3Bc59b59Vjh0o12HEIaLf9ZvpfUQcE&callback=initMap&libraries=places&v=weekly"
+      async
+    ></script>
+
+
+<style>
+  #pills-tab a {
+    color: black;
+  }
+
+  #pills-tab a:hover {
+    color: orange;
+    text-decoration: none;
+  }
+
+  #pills-tab a.active {
+    color: orange;
+  }
+
+  #pickup-map,
+  #map {
+    height: 150%;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- LEFT SIDE -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    JOB SUMMARY
+                </div>
+                <div class="card-body">
+                    {% if not job %}
+                    <p>A summary of your job information will be here</p>
+                    {% else %}
+
+                    {% if step > 1 %}
+                        <h4>Name:{{ job.name }}</h4>
+                        <span>Service Category:{{ job.category }}</span>
+                    {% endif %}
+
+                     {% if step > 2 %}
+                        <hr/>
+                        <p class="text-secondary"><small>DISPATCH</b></small>
+                        <h4>Name:{{ job.my_name }}</h4>
+                        <span>{{ job.location_address }}</span>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- RIGHT SIDE -->
+        <div class="col-lg-8">
+            <!-- Steps Tabs -->
+            <div class="card mb-5">
+                <div class="card-body">
+                    <ul class="nav nav-pills nav-justified align-items centre mb-3" id="pills-tab" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <a class="{% if step == 1 %}active{% endif %}" id="pills-info-tab" data-toggle="pill" href="#pills-info" role="tab"
+                         aria-controls="pills-pickup " aria-selected="true">Service Info</a>
+                      </li>
+                      <i class="fas fa-chevron-right"></i>
+                      <li class="nav-item" role="presentation">
+                        <a class="{% if step == 2 %}active{% endif %}" id="pills-pickup-tab" data-toggle="pill" href="#pills-pickup" role="tab" aria-controls="pills-profile"
+                         aria-selected="false">Dispatch</a>
+                      </li>
+                      <i class="fas fa-chevron-right"></i>
+                      <li class="nav-item" role="presentation">
+                        <a class="{% if step == 3 %}active{% endif %}" id="pills-delivery-tab" data-toggle="pill" href="#pills-delivery" role="tab" aria-controls="pills-delivery"
+                         aria-selected="false">Service Delivery</a>
+                      </li>
+                      <i class="fas fa-chevron-right"></i>
+                       <li class="nav-item" role="presentation">
+                        <a class="{% if step == 4 %}active{% endif %}" id="pills-payment-tab" data-toggle="pill" href="#pills-payment" role="tab" aria-controls="pills-payment"
+                         aria-selected="false">Payment</a>
+                       </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Step forms -->
+            <b>CREATE A JOB</b>
+            <div class="tab-content" id="pills-tabContent">
+                <!-- Step 1 -->
+              <div class="tab-pane fade {% if step == 1%} show active{% endif %}" id="pills-info" role="tabpanel" aria-labelledby="pills-info-tab">
+                <h1>Service Info</h1>
+                  <form method="POST" enctype="multipart/form-data">
+                    <b class="text-secondary">Item Information</b><br />
+                    <div class="card bg-white mt-2 mb-5">
+                      <div class="card-body">
+                        {% csrf_token %}
+                        {% bootstrap_form step1_form %}
+                      </div>
+                    </div>
+                    <input type="hidden" name="step" value="1">
+                    <button type="submit" class="btn btn-info">Save & Continue</button>
+                  </form>
+              </div>
+                <!-- Step 2 -->
+        <div class="tab-pane fade {% if step == 2 %}show active{% endif %}" id="pills-pickup" role="tabpanel"
+          aria-labelledby="pills-pickup-tab">
+          <h1>Dispatch</h1>
+
+          <form method="POST" enctype="multipart/form-data">
+            <b class="text-secondary">Dispatch Information</b><br />
+            <div class="card bg-white mt-2 mb-5">
+              <div class="card-body">
+
+                <div class="row">
+                  <div class="col-lg-8">
+                    {% csrf_token %}
+                    {% bootstrap_form step2_form %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" name="step" value="2">
+            <button type="button" class="btn btn-outline-info"
+              onclick="$('#pills-info-tab').tab('show');">Back</button>
+            <button type="submit" class="btn btn-info">Save & Continue</button>
+          </form>
+        </div>
+                <!-- Step 3 -->
+              <div class="tab-pane fade {% if step == 3%} show active{% endif %}" id="pills-delivery" role="tabpanel" aria-labelledby="pills-delivery-tab">
+                <h1>Delivery</h1>
+
+          <form method="POST" enctype="multipart/form-data">
+            <b class="text-secondary">Delivery Information</b><br />
+            <div class="card bg-white mt-2 mb-5">
+              <div class="card-body">
+
+                <div class="row">
+                  <div class="col-lg-8">
+                    {% csrf_token %}
+                    {% bootstrap_form step3_form exclude='location_lat, location_lng' %}
+                    <input hidden id="delivery_lat" name="delivery_lat" value="{{ job.location_lat }}" />
+                    <input hidden id="delivery_lng" name="delivery_lng" value="{{ job.location_lng }}">
+                  </div>
+                  <div class="col-lg-4">
+
+                      <div id="map"></div>
+                        <div id="infowindow-content">
+                          <span id="place-name" class="title"></span><br />
+                          <span id="place-address"></span>
+                        </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" name="step" value="3">
+            <button type="button" class="btn btn-outline-warning"
+              onclick="$('#pills-info-tab').tab('show');">Back</button>
+            <button type="submit" class="btn btn-warning">Save & Continue</button>
+          </form>
+              </div>
+                <!-- Step 4 -->
+              <div class="tab-pane fade {% if step == 4%} show active{% endif %}" id="pills-payment" role="tabpanel" aria-labelledby="pills-payment-tab">
+                <h1>Payment</h1>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+var deliveryLat = parseFloat('{{ job.location_lat }}');
+var deliveryLng = parseFloat('{{ job.location_lng }}');
+function initMap(deliveryLat, deliveryLng) {
+
+  const map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: -1.286389, lng: 36.817223 },
+    zoom: 13,
+  });
+  const card = document.getElementById("pac-card");
+  const input = document.getElementById("location_address");
+  const biasInputElement = document.getElementById("use-location-bias");
+  const strictBoundsInputElement = document.getElementById("use-strict-bounds");
+  const options = {
+    fields: ["formatted_address", "geometry", "name"],
+    strictBounds: false,
+    types: ["establishment"],
+  };
+
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(card);
+
+  const autocomplete = new google.maps.places.Autocomplete(input, options);
+
+  // Bind the map's bounds (viewport) property to the autocomplete object,
+  // so that the autocomplete requests use the current map bounds for the
+  // bounds option in the request.
+  autocomplete.bindTo("bounds", map);
+
+  const infowindow = new google.maps.InfoWindow();
+  const infowindowContent = document.getElementById("infowindow-content");
+
+  infowindow.setContent(infowindowContent);
+
+  const marker = new google.maps.Marker({
+    map,
+    anchorPoint: new google.maps.Point(0, -29),
+  });
+
+  autocomplete.addListener("place_changed", () => {
+    infowindow.close();
+    marker.setVisible(false);
+
+    const place = autocomplete.getPlace();
+
+    if (!place.geometry || !place.geometry.location) {
+      // User entered the name of a Place that was not suggested and
+      // pressed the Enter key, or the Place Details request failed.
+      window.alert("No details available for input: '" + place.name + "'");
+      return;
+    }
+
+    // If the place has a geometry, then present it on a map.
+    if (place.geometry.viewport) {
+      map.fitBounds(place.geometry.viewport);
+    } else {
+      map.setCenter(place.geometry.location);
+      map.setZoom(13);
+    }
+
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
+    infowindowContent.children["place-name"].textContent = place.name;
+    infowindowContent.children["place-address"].textContent =
+      place.formatted_address;
+    infowindow.open(map, marker);
+  });
+
+  // Sets a listener on a radio button to change the filter type on Places
+  // Autocomplete.
+  function setupClickListener(id, types) {
+    const radioButton = document.getElementById(id);
+
+    radioButton.addEventListener("click", () => {
+      autocomplete.setTypes(types);
+      input.value = "";
+    });
+  }
+
+  setupClickListener("changetype-all", []);
+  setupClickListener("changetype-address", ["address"]);
+  setupClickListener("changetype-establishment", ["establishment"]);
+  setupClickListener("changetype-geocode", ["geocode"]);
+  biasInputElement.addEventListener("change", () => {
+    if (biasInputElement.checked) {
+      autocomplete.bindTo("bounds", map);
+    } else {
+      // User wants to turn off location bias, so three things need to happen:
+      // 1. Unbind from map
+      // 2. Reset the bounds to whole world
+      // 3. Uncheck the strict bounds checkbox UI (which also disables strict bounds)
+      autocomplete.unbind("bounds");
+      autocomplete.setBounds({ east: 180, west: -180, north: 90, south: -90 });
+      strictBoundsInputElement.checked = biasInputElement.checked;
+    }
+
+    input.value = "";
+  });
+  strictBoundsInputElement.addEventListener("change", () => {
+    autocomplete.setOptions({
+      strictBounds: strictBoundsInputElement.checked,
+    });
+    if (strictBoundsInputElement.checked) {
+      biasInputElement.checked = strictBoundsInputElement.checked;
+      autocomplete.bindTo("bounds", map);
+    }
+
+    input.value = "";
+  });
+}
+</script>
+{% endblock %}

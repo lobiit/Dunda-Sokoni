@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+
+{% block content%}
+
+<div class="container-fluid mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body" style="background-color: #3E2723">
+          <h4 class="text-center text-uppercase mb-3">
+            <b>
+              {% if request.GET.next != '/courier/' %}
+                <h1 style="color: yellow">Customer</h1>>
+              {% else %}
+                  <h1 style="color: yellow">Courier</h1>
+              {% endif %}
+            </b>
+          </h4>
+
+          <form method="POST" style="color: white">
+            {% csrf_token %}
+            {% bootstrap_form form%}
+            <button type="submit" class="btn btn-warning btn-block btn-outline-dark">Sign Up</button>
+            <p class="text-center mt-3" style="color: white">
+              Already have an account? <a href="/sign-in/?next={{ request.GET.next }} "><b>Sign In</b></a>
+            </p>
+            <hr>
+            <a href="{% url 'social:begin' 'facebook' %}?next={{ request.GET.next }}"
+              class="btn btn-outline-primary btn-block">Sign In with Facebook</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
