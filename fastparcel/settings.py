@@ -134,6 +134,7 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = '/static/'
+STATIC_ROOT='staticfiles'
 
 LOGIN_URL = '/sign-in/'
 LOGIN_REDIRECT_URL = '/'
@@ -188,5 +189,5 @@ CHANNEL_LAYERS = {
 }
 
 # Activate Django Heroku
-import django_on_heroku
-django_on_heroku.settings(locals())
+import django_heroku
+django_heroku.settings(locals())
