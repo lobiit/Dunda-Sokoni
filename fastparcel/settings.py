@@ -177,7 +177,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": ['YOUR_HEROKU_REDIS_URL'],
+            "hosts": ['redis://:pb8ee434d9952cb72cc544047f4faad19b82abe252c13f2c58f6568246375fda4@ec2-54-175-159-190.compute-1.amazonaws.com:28800'],
         },
     },
 }
