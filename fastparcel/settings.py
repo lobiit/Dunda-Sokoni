@@ -16,7 +16,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -27,7 +26,6 @@ SECRET_KEY = 'f88mj#!)pv2_jx8d^58+roz4rv2fuhx!@n7%7#lo$6fgy@(h&v'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*', ]
-
 
 # Application definition
 
@@ -40,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'bootstrap4',
     'social_django',
     'core.apps.CoreConfig',
@@ -81,19 +79,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'fastparcel.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'FastParcel',
+        'USER': 'postgres',
+        'PASSWORD': 'Pythondev12!?',
+        'HOST': 'localhost'
     }
 }
-
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -113,7 +111,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -127,13 +124,12 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = '/static/'
-STATIC_ROOT='staticfiles'
+STATIC_ROOT = 'staticfiles'
 
 LOGIN_URL = '/sign-in/'
 LOGIN_REDIRECT_URL = '/'
@@ -176,7 +172,6 @@ NOTIFICATION_URL = "https://protected-wildwood-89040.herokuapp.com"
 
 ASGI_APPLICATION = "fastparcel.asgi.application"
 
-
 # Channels
 CHANNEL_LAYERS = {
     'default': {
@@ -189,4 +184,5 @@ CHANNEL_LAYERS = {
 
 # Activate Django Heroku
 import django_heroku
+
 django_heroku.settings(locals())
