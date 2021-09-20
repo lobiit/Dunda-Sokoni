@@ -168,7 +168,7 @@ PAYPAL_MODE = "sandbox"
 PAYPAL_CLIENT_ID = "YOUR_PAYPAL_CLIENT_ID"
 PAYPAL_CLIENT_SECRET = "YOUR_PAYPAL_CLIENT_SECRET"
 
-NOTIFICATION_URL = "https://protected-wildwood-89040.herokuapp.com"
+NOTIFICATION_URL = "https://dunda-sokoni.herokuapp.com/"
 
 ASGI_APPLICATION = "fastparcel.asgi.application"
 
