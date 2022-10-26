@@ -86,9 +86,9 @@ WSGI_APPLICATION = 'fastparcel.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'FastParcel',
+        'NAME': '',
         'USER': 'postgres',
-        'PASSWORD': 'Pythondev12!?',
+        'PASSWORD': '',
         'HOST': 'localhost'
     }
 }
@@ -142,8 +142,8 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-SOCIAL_AUTH_FACEBOOK_KEY = "1041448706391897"
-SOCIAL_AUTH_FACEBOOK_SECRET = "ae5bea4d64b6ea01fb6f6150d3ff781f"
+SOCIAL_AUTH_FACEBOOK_KEY = ""
+SOCIAL_AUTH_FACEBOOK_SECRET = ""
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
     'fields': 'id, name, email'
@@ -153,16 +153,16 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'johnlobiit@gmail.com'
-EMAIL_HOST_PASSWORD = 'Pythondev12!?'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
 DEFAULT_FROM_EMAIL = 'firebase-adminsdk-5txsn@undwa-c6f43.iam.gserviceaccount.com'
 
 FIREBASE_ADMIN_CREDENTIAL = os.path.join(BASE_DIR, "undwa-c6f43-firebase-adminsdk-5txsn-b2ad517789.json")
 
-STRIPE_API_PUBLIC_KEY = "pk_test_51JY8imKpY7UFqkDbWBrlWbmG2R8CGhANPRhOVPhNIJYRcuMea7v4L10VLfVuRiMRBcO63JmIhKmbwjkEB2k5UOSg00gvadj47E"
-STRIPE_API_SECRET_KEY = "sk_test_51JY8imKpY7UFqkDb25pbQ0SbHsnRXZq4C5Z0OEP4z66vQWMySppMJVwLvenzKA2ciSJo8i83W1eyDPi4gWck2rC200CuqES3Rq"
+STRIPE_API_PUBLIC_KEY = ""
+STRIPE_API_SECRET_KEY = ""
 
-GOOGLE_MAP_API_KEY = "AIzaSyAPR3Bc59b59Vjh0o12HEIaLf9ZvpfUQcE"
+GOOGLE_MAP_API_KEY = ""
 
 PAYPAL_MODE = "sandbox"
 PAYPAL_CLIENT_ID = "YOUR_PAYPAL_CLIENT_ID"
